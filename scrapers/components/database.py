@@ -3,15 +3,6 @@ import os
 import sys
 from typing import Dict, List, Any
 
-
-"""
-class Course(Model):
-    name = CharField()
-    link = CharField()
-    faculty = ForeignKeyField(Faculty, backref="course")
-    tags = None
-"""
-
 class Program(Model):
     name = CharField()
     faculty = CharField()
@@ -19,10 +10,16 @@ class Program(Model):
     description = CharField()
     learning = CharField()
     practical = CharField()
-    # faculty = ForeignKeyField(Faculty, backref="program")
     #program_type = CharField()
     #length = IntegerField()
     #language = CharField()
+
+
+class Course(Model):
+    name = CharField()
+    link = CharField()
+    faculty = CharField()
+    # faculty = ForeignKeyField(Faculty, backref="course")
 
 
 class Skill(Model):
@@ -48,15 +45,23 @@ class Database:
 
 
     def insert_program(self, data: Dict[str, Any]) -> None:
-        print("Inserting")
-        program, _ = Program.get_or_create(
-            name = data["name"],
-            faculty = data["faculty"],
-            catalogue_url = data["catalogue_url"],
-            description = data["description"],
-            learning = data["learning"],
-            practical = data["practical"],
-
+        full_data = {
+            "name": None,
+            "faculty": None,
+            "catalogue_url": None,
+            "program_type": None,
+            "length": None,
+            "language": None,
+            "description": None,
+            "learning": None,
+            "practical": None,
+            **data
+        }
+        if Program.get_or_none(Program.catalog_url == full_data["catalog_url"]):
+            query = Program.update(**full_data).where(Program.catalog_url == full_data["catalog_url"])
+            query.execute()
+        else:
+            Program.create(**full_data)
         )
 
 
