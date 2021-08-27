@@ -1,14 +1,39 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 import openpyxl
 import scrapy
+import selenium
 from scrapy.selector import Selector
 import time
 from components.logger import Logger
 from components.helper import error_message, driver_file
-from components.sqlite import SqliteDatabase
 from selenium import webdriver
 import re
+
+
+@dataclass
+class Predmet:
+    nazev: str
+    cile: str
+    pozadavky: str
+    obsah: str
+    # predpoklady_znalosti: str
+    # predpoklady_dovednosti: str
+    # predpoklady_zpusobilosti: str
+    # vysledky_znalosti: str
+    # vysledky_dovednosti: str
+    # vysledky_zpusobilosti: str
+
+    @staticmethod
+    def parse(driver: selenium.webdriver.Chrome):
+        nazev = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[1]/tbody/tr[3]/td[1]').text
+        cile = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[2]/tbody/tr[2]/td').text
+        pozadavky = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[2]/tbody/tr[4]/td').text
+        obsah = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[2]/tbody/tr[6]/td').text
+
+        return Predmet(
+            nazev, cile, pozadavky, obsah)
 
 
 class SkillSpider(scrapy.Spider):
@@ -18,7 +43,6 @@ class SkillSpider(scrapy.Spider):
 
     def __init__(self):
         super().__init__()
-        self.database = SqliteDatabase()
         self.logging = Logger(spider=self.name).logger
         self.driver = webdriver.Chrome(driver_file())
         self.url_index = 0
@@ -28,7 +52,7 @@ class SkillSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             print("Opening", len(self.predmet_params), "params")
-            for _ in range(len(self.predmet_params)):
+            for _ in range(len(self.predmet_params))[:50]:
                 yield scrapy.Request(url=url, callback=self.parse, dont_filter=True)
 
     def load_export_predmetu(self):
@@ -58,5 +82,5 @@ class SkillSpider(scrapy.Spider):
         submit_button.click()
 
         # predemet loaded
-
+        print(Predmet.parse(self.driver))
 
