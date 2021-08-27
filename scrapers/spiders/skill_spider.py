@@ -90,7 +90,7 @@ class SkillSpider(scrapy.Spider):
                 skill_type = self.get_skill_type(row)
                 type = self.get_type(row)
             else:
-                self.database.
+                pass
 
 
     def get_skill_type(self, row):
