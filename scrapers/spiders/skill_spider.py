@@ -8,10 +8,32 @@ from selenium import webdriver
 import re
 
 
-class ZCUProgramSpider(scrapy.Spider):
-    allowed_domains = ['techcrunch.com']
-    name = "techcrunch_spider"
-    start_urls = ["https://techcrunch.com"]
+row_headers = {
+    "Odborné znalosti - pro úspěšné zvládnutí oboru se předpokládá, že je student před zahájením výuky schopen:": {"before":
+    "Odborné dovednosti - pro úspěšné zvládnutí oboru se předpokládá, že student před zahájením výuky dokáže:",
+    "Obecné způsobilosti - před zahájením studia oboru je student schopen:",
+    "Odborné znalosti - po absolvování oboru prokazuje student znalosti:",
+    "Odborné dovednosti - po absolvování oboru prokazuje student dovednosti:",
+    "Obecné způsobilosti - po absolvování oboru je student schopen:",
+    "Odborné znalosti - pro dosažení odborných znalostí jsou užívány vyučovací metody:",
+    "Odborné dovednosti - pro dosažení odborných dovedností jsou užívány vyučovací metody:",
+    "Obecné způsobilosti - pro dosažení obecných způsobilostí jsou užívány vyučovací metody:",
+    "Odborné znalosti - odborné znalosti dosažené studiem oboru jsou ověřovány hodnoticími metodami:",
+    "Odborné dovednosti - odborné dovednosti dosažené studiem oboru jsou ověřovány hodnoticími metodami:",
+    "Obecné způsobilosti - obecné způsobilosti dosažené studiem oboru jsou ověřovány hodnoticími metodami:"
+}
+
+skip_rows = [
+    "Předpoklady",
+    "Výsledky učení",
+    "Vyučovací metody",
+    "Hodnoticí metody"
+]
+
+class SkillSpider(scrapy.Spider):
+    allowed_domains = ['www.zcu.cz']
+    name = "skill_spider"
+    start_urls = ["https://www.zcu.cz/cs/Admission/Study-fields/index.html?FieldNumber=B0114A300081&FormOfStudy=P&TypeOfStudy=B'"]
 
     def __init__(self):
         super().__init__()
@@ -19,7 +41,7 @@ class ZCUProgramSpider(scrapy.Spider):
         self.logging = Logger(spider=self.name).logger
         self.driver = webdriver.Chrome(driver_file())
         self.url_index = 0
-        self.article_urls = self.database.get_urls()
+        self.program_urls = self.database.get_programs()
 
     def start_requests(self):
         for url in self.start_urls:
@@ -31,39 +53,37 @@ class ZCUProgramSpider(scrapy.Spider):
         try:
             time.sleep(1)
             body = self.driver.find_element_by_css_selector('body')
-            title = self.driver.find_element_by_css_selector('title').get_attribute('innerHTML')
-            text = self.driver.find_element_by_css_selector('div.article-content').get_attribute('innerText')
-            self.logging.info(f'Loaded article number {self.url_index} with title: {title}')
             selector = Selector(text=body.get_attribute('innerHTML'))
-            self.extract_article_urls(selector)
-            self.parse_article(text, title)
+            self.open_detail(selector)
+        except Exception as e:
+            self.logging.error("Error getting body" + error_message(e))
+
+    def test_detaiL_url(self, url):
+        return re.match("https:\/\/portal.zcu.cz*", url)
+
+    def open_detail(self, selector):
+        detail_link = selector.css("a#detailButton:attr(href)").extract()
+        self.driver.get(detail_link)
+        try:
+            time.sleep(1)
+            body = self.driver.find_element_by_css_selector('body')
+            selector = Selector(text=body.get_attribute('innerHTML'))
+            self.extract_table(selector)
         except Exception as e:
             self.logging.error("Error getting body" + error_message(e))
         finally:
             self.logging.info(f"Link number: {self.url_index}")
-            if (self.url_index < len(self.article_urls)):
-                self.current_url = self.article_urls[self.url_index]
+            if (self.url_index < len(self.program_urls)):
+                self.current_url = self.program_urls[self.url_index]
                 self.url_index += 1
                 yield scrapy.Request(url=self.current_url, callback=self.parse)
 
-    def test_url(self, url):
-        return re.match("https:\/\/techcrunch\.com\/20[1-2][0-9]\/[0-9]+\/[0-9]+\/(\w|\-)*", url)
+    def extract_table(self, selector):
+        table = selector.css("div.prohlizeniEntitaSubdetailPanesCoat").css("table")
+        rows = table.css("td::text").extract()
+        self.parse_table(rows)
 
-    def extract_article_urls(self, selector):
-        links = selector.css("a::attr(href)").extract()
-        added = []
-        for link in links:
-            url = "https://techcrunch.com" + link
-            if self.test_url(url) and url not in self.article_urls:
-                self.logging.info(url)
-                item = {"url": url}
-                added.append(item)
-                self.article_urls.append(url)
-                self.database.insert_url(item)
-        self.logging.info(f"Added {len(added)} links to {len(self.article_urls) - self.url_index} remaining")
-
-
-    def parse_article(self, text, title):
-        json = {"text": text, "url": self.driver.current_url, "title": title}
-        self.database.insert_article(json)
+    def parse_table(self, rows):
+        for row in rows:
+            if row in row_headers:
 
