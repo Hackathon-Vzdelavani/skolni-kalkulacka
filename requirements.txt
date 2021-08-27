@@ -1,0 +1,15 @@
+pymongo==3.11.4
+Scrapy==2.5.0
+selenium==3.141.0
+unidecode==1.2.0
+pytextrank==3.1.1
+PyYAML==5.3.1
+neo4j==4.2.1
+html2text==2020.1.16
+spacy-langdetect==0.1.2
+spacy==3.0.6
+pytextrank==3.1.1
+faiss-cpu==1.6.5
+sentence_transformers==0.4.1.2
+pandas==1.2.0
+mysqlclient==2.0.3
