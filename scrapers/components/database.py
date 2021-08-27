@@ -13,14 +13,21 @@ class Course(Model):
 """
 
 class Program(Model):
+    catalog_url = CharField(primary_key=True)
     name = CharField()
     faculty = CharField()
     # faculty = ForeignKeyField(Faculty, backref="program")
-    catalog_url = CharField()
-    #program_type = CharField()
-    #length = IntegerField()
-    #language = CharField()
+    program_type = CharField(null=True)
+    length = IntegerField(null=True)
+    language = CharField(null=True)
 
+
+class Course(Model):
+    name = CharField()
+    link = CharField()
+    faculty = CharField()
+    # faculty = ForeignKeyField(Faculty, backref="course")
+    
 
 class Skill(Model):
     name = CharField()
@@ -43,11 +50,20 @@ class Database:
 
 
     def insert_program(self, data: Dict[str, Any]) -> None:
-        program, _ = Program.get_or_create(
-            name = data["name"],
-            faculty = data["faculty"],
-            catalog_url = data["catalog_url"],
-        )
+        full_data = {
+            "name": None,
+            "faculty": None,
+            "catalog_url": None,
+            "program_type": None,
+            "length": None,
+            "language": None,
+            **data
+        }
+        if Program.get_or_none(Program.catalog_url == full_data["catalog_url"]):
+            query = Program.update(**full_data).where(Program.catalog_url == full_data["catalog_url"])
+            query.execute()
+        else:
+            Program.create(**full_data)
 
 
     def insert_skill(self, data: Dict[str, Any]) -> None:
@@ -62,5 +78,6 @@ if __name__ == "__main__":
     parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     database_path = os.path.join(parent_directory, "data", "kalkulacka.db")
     db = Database(database_path)
-
-
+    for i in range(10):
+        db.insert_program({"name":f"name{i}", "faculty":"faculty", "catalog_url":f"catalog_url{i}"})
+    db.insert_program({"name":f"nameX", "faculty":"faculty", "catalog_url":"catalog_url5"})
