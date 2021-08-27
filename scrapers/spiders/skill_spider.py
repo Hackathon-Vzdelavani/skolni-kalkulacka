@@ -33,7 +33,7 @@ skip_rows = [
 class SkillSpider(scrapy.Spider):
     allowed_domains = ['www.zcu.cz']
     name = "skill_spider"
-    start_urls = ["https://www.zcu.cz/cs/Admission/Study-fields/index.html?FieldNumber=B0114A300081&FormOfStudy=P&TypeOfStudy=B'"]
+    start_urls = ["https://portal.zcu.cz/StagPortletsJSR168/CleanUrl?urlid=prohlizeni-browser-obor&browserFakulta=FDU&browserProgram=1808&browserObor=4036&browserRok=2021"]
 
     def __init__(self):
         super().__init__()
@@ -47,23 +47,12 @@ class SkillSpider(scrapy.Spider):
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse)
 
+    def test_program_url(self, url):
+        return re.match("https:\/\/portal.zcu.cz*", url)
+
     def parse(self, response):
         self.logging.info('Visiting ' + response.url)
         self.driver.get(response.url)
-        try:
-            time.sleep(1)
-            body = self.driver.find_element_by_css_selector('body')
-            selector = Selector(text=body.get_attribute('innerHTML'))
-            self.open_detail(selector)
-        except Exception as e:
-            self.logging.error("Error getting body" + error_message(e))
-
-    def test_detaiL_url(self, url):
-        return re.match("https:\/\/portal.zcu.cz*", url)
-
-    def open_detail(self, selector):
-        detail_link = selector.css("a#detailButton:attr(href)").extract()
-        self.driver.get(detail_link)
         try:
             time.sleep(1)
             body = self.driver.find_element_by_css_selector('body')

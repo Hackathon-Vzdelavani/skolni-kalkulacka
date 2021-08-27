@@ -4,6 +4,14 @@ import sys
 from typing import Dict, List, Any
 
 
+"""
+class Course(Model):
+    name = CharField()
+    link = CharField()
+    faculty = ForeignKeyField(Faculty, backref="course")
+    tags = None
+"""
+
 class Program(Model):
     catalog_url = CharField(primary_key=True)
     name = CharField()
@@ -29,15 +37,15 @@ class Skill(Model):
 
 class Database:
     def __init__(self, db_path):
-        self.db = SqliteDatabase(database_path, pragmas={'foreign_keys': 1})
+        self.db = SqliteDatabase(db_path, pragmas={'foreign_keys': 1})
         self.bind_db()
 
     def bind_db(self) -> None:
         """
         Bind the models to the database.
         """
-        self.db.bind([Program])   
-        self.db.create_tables([Program])
+        self.db.bind([Program, Skill])
+        self.db.create_tables([Program, Skill])
         self.db.close()
 
 
@@ -58,12 +66,12 @@ class Database:
             Program.create(**full_data)
 
 
-    def insert_skill(self) -> None:
-        ...
-
-
-    def insert_course(self) -> None:
-        ...
+    def insert_skill(self, data: Dict[str, Any]) -> None:
+        program, _ = Skill.get_or_create(
+            name = data["name"],
+            type = data["type"],
+            skill_type = data["skill_type"],
+        )
 
 
 if __name__ == "__main__":
