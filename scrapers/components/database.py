@@ -4,6 +4,14 @@ import sys
 from typing import Dict, List, Any
 
 
+"""
+class Course(Model):
+    name = CharField()
+    link = CharField()
+    faculty = ForeignKeyField(Faculty, backref="course")
+    tags = None
+"""
+
 class Program(Model):
     name = CharField()
     faculty = CharField()
@@ -13,13 +21,6 @@ class Program(Model):
     #length = IntegerField()
     #language = CharField()
 
-"""
-class Course(Model):
-    name = CharField()
-    link = CharField()
-    faculty = ForeignKeyField(Faculty, backref="course")
-    tags = None
-"""
 
 class Skill(Model):
     name = CharField()
@@ -27,35 +28,39 @@ class Skill(Model):
     skill_type = CharField()
 
 
-def init_db(db: SqliteDatabase) -> None:
-    """
-    Bind the models to the database.
-    """
-    db.bind([Program])   
-    db.create_tables([Program])
-    db.close()
+class Database:
+    def __init__(self, db_path):
+        self.db = SqliteDatabase(db_path, pragmas={'foreign_keys': 1})
+        self.bind_db()
+
+    def bind_db(self) -> None:
+        """
+        Bind the models to the database.
+        """
+        self.db.bind([Program, Skill])
+        self.db.create_tables([Program, Skill])
+        self.db.close()
 
 
-def insert_program(db: SqliteDatabase, data: Dict[str, Any]) -> None:
-    program, _ = Program.get_or_create(
-        name = data["name"],
-        faculty = data["faculty"],
-        catalog_url = data["catalog_url"],
-    )
+    def insert_program(self, data: Dict[str, Any]) -> None:
+        program, _ = Program.get_or_create(
+            name = data["name"],
+            faculty = data["faculty"],
+            catalog_url = data["catalog_url"],
+        )
 
 
-def insert_skill(db: SqliteDatabase) -> None:
-    ...
+    def insert_skill(self, data: Dict[str, Any]) -> None:
+        program, _ = Skill.get_or_create(
+            name = data["name"],
+            type = data["type"],
+            skill_type = data["skill_type"],
+        )
 
-
-def insert_course(db: SqliteDatabase) -> None:
-    db.connect()
-    
-    return True
 
 if __name__ == "__main__":
     parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     database_path = os.path.join(parent_directory, "data", "kalkulacka.db")
-    db = SqliteDatabase(database_path, pragmas={'foreign_keys': 1})
-    init_db(db)
-    insert_program(db, {"name":"name", "faculty":"faculty", "catalog_url":"catalog_url"})
+    db = Database(database_path)
+
+
