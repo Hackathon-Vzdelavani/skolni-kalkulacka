@@ -8,8 +8,8 @@ from selenium import webdriver
 import re
 
 
-row_headers = {
-    "Odborné znalosti - pro úspěšné zvládnutí oboru se předpokládá, že je student před zahájením výuky schopen:": {"before":
+row_headers = [
+    "Odborné znalosti - pro úspěšné zvládnutí oboru se předpokládá, že je student před zahájením výuky schopen:",
     "Odborné dovednosti - pro úspěšné zvládnutí oboru se předpokládá, že student před zahájením výuky dokáže:",
     "Obecné způsobilosti - před zahájením studia oboru je student schopen:",
     "Odborné znalosti - po absolvování oboru prokazuje student znalosti:",
@@ -21,7 +21,7 @@ row_headers = {
     "Odborné znalosti - odborné znalosti dosažené studiem oboru jsou ověřovány hodnoticími metodami:",
     "Odborné dovednosti - odborné dovednosti dosažené studiem oboru jsou ověřovány hodnoticími metodami:",
     "Obecné způsobilosti - obecné způsobilosti dosažené studiem oboru jsou ověřovány hodnoticími metodami:"
-}
+]
 
 skip_rows = [
     "Předpoklady",
@@ -86,4 +86,19 @@ class SkillSpider(scrapy.Spider):
     def parse_table(self, rows):
         for row in rows:
             if row in row_headers:
+
+
+    def get_skill_type(self, row):
+        if "Odborné znalosti" in row:
+            pass
+
+    def get_type(self, row):
+        if "před zahájením" in row:
+            return "před"
+        if "po absolvování" in row:
+            return "po"
+        if "vyučovací metody" in row:
+            return "vyučovací metody"
+        if "hodnoticími metodami" in row:
+            return "hodnoticí metody"
 
