@@ -86,6 +86,7 @@ class SkillSpider(scrapy.Spider):
     def parse_table(self, rows):
         for row in rows:
             if row in row_headers:
+                pass
 
 
     def get_skill_type(self, row):
