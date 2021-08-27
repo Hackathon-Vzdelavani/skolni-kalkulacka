@@ -50,6 +50,7 @@ class ProgramSpider(scrapy.Spider):
             if self.test_url(url) and url not in self.program_urls:
                 self.logging.info(name)
                 item = {"url": url, "name": name, "faculty": faculty, "tags": tags}
+                print(item)
                 self.program_urls.append(url)
                 #self.database.insert_program(item)
 
