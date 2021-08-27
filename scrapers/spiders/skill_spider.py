@@ -3,7 +3,7 @@ from scrapy.selector import Selector
 import time
 from components.logger import Logger
 from components.helper import error_message, driver_file
-from components.mysql import MySQLDatabase
+from components.sqlite import SqliteDatabase
 from selenium import webdriver
 import re
 
@@ -15,7 +15,7 @@ class ZCUProgramSpider(scrapy.Spider):
 
     def __init__(self):
         super().__init__()
-        self.database = Mongo()
+        self.database = SqliteDatabase()
         self.logging = Logger(spider=self.name).logger
         self.driver = webdriver.Chrome(driver_file())
         self.url_index = 0
