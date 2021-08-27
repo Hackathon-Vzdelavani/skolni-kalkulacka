@@ -58,6 +58,7 @@ class SkillSpider(scrapy.Spider):
             body = self.driver.find_element_by_css_selector('body')
             selector = Selector(text=body.get_attribute('innerHTML'))
             self.extract_table(selector)
+            self.extract_program_header(selector)
         except Exception as e:
             self.logging.error("Error getting body" + error_message(e))
         finally:
@@ -67,13 +68,26 @@ class SkillSpider(scrapy.Spider):
                 self.url_index += 1
                 yield scrapy.Request(url=self.current_url, callback=self.parse)
 
+    def extract_program_header(self, selector):
+        item = {}
+        table = selector.xpath('///*[@id="prohlizeniEntitaSubdetailPanesCoat"]/table[0]/tbody')
+        item["specialization_name"] = table.xpath('tr[0]/td[0]').extract_first()
+        item["specialization_number"] = selector.xpath('tr[2]/td[1]').extract_first()
+        item["shortcut"] = selector.xpath('tr[1]/td[0]').extract_first()
+        item["form"] = selector.xpath('tr[3]/td[0]').extract_first()
+        item["type"] = selector.xpath('tr[3]/td[1]').extract_first()
+        item["length"] = selector.xpath('tr[4]/td[0]').extract_first()
+        item["goal"] = selector.xpath('tr[6]/td[0]').extract_first()
+        item["annotation"] = selector.xpath('tr[7]/td[0]').extract_first()
+        print(item)
+        #self.database.insert_program(item)
+
     def extract_table(self, selector):
         table = selector.css("div.prohlizeniEntitaSubdetailPanesCoat").css("table")
         rows = table.css("td::text").extract()
         self.parse_table(rows)
 
     def parse_table(self, rows):
-        item = {}
         for row in rows:
             if row in row_headers:
                 item["skill_type"] = self.get_skill_type(row)

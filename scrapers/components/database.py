@@ -7,6 +7,14 @@ class Program(Model):
     name = CharField()
     faculty = CharField()
     catalogue_url = CharField()
+    specialization_name = CharField()
+    specialization_number = CharField()
+    shortcut = CharField()
+    form = CharField()
+    type = CharField()
+    goal = CharField()
+    annotation = CharField()
+    length = CharField()
     description = CharField()
     learning = CharField()
     practical = CharField()
@@ -49,9 +57,14 @@ class Database:
             "name": None,
             "faculty": None,
             "catalogue_url": None,
-            "program_type": None,
+            "specialization_name"
+            "shortcut": None,
+            "specialization_number": None,
+            "form": None,
+            "type": None,
+            "goal": None,
+            "annotation": None,
             "length": None,
-            "language": None,
             "description": None,
             "learning": None,
             "practical": None,
