@@ -3,7 +3,7 @@ from scrapy.selector import Selector
 import time
 from components.logger import Logger
 from components.helper import error_message, driver_file
-from components.sqlite import SqliteDatabase
+from components.database import Database
 from selenium import webdriver
 import re
 
@@ -37,7 +37,7 @@ class SkillSpider(scrapy.Spider):
 
     def __init__(self):
         super().__init__()
-        self.database = SqliteDatabase()
+        self.database = Database()
         self.logging = Logger(spider=self.name).logger
         self.driver = webdriver.Chrome(driver_file())
         self.url_index = 0
@@ -73,13 +73,14 @@ class SkillSpider(scrapy.Spider):
         self.parse_table(rows)
 
     def parse_table(self, rows):
-        skill_type, type = None, None
+        item = {}
         for row in rows:
             if row in row_headers:
-                skill_type = self.get_skill_type(row)
-                type = self.get_type(row)
+                item["skill_type"] = self.get_skill_type(row)
+                item["type"] = self.get_type(row)
             else:
-                self.database.
+                item["name"] = row
+                self.database.insert_skill(item)
 
 
     def get_skill_type(self, row):

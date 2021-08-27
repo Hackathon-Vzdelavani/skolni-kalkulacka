@@ -15,8 +15,11 @@ class Course(Model):
 class Program(Model):
     name = CharField()
     faculty = CharField()
+    catalogue_url = CharField()
+    description = CharField()
+    learning = CharField()
+    practical = CharField()
     # faculty = ForeignKeyField(Faculty, backref="program")
-    catalog_url = CharField()
     #program_type = CharField()
     #length = IntegerField()
     #language = CharField()
@@ -29,8 +32,10 @@ class Skill(Model):
 
 
 class Database:
-    def __init__(self, db_path):
-        self.db = SqliteDatabase(db_path, pragmas={'foreign_keys': 1})
+    def __init__(self):
+        parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        database_path = os.path.join(parent_directory, "data", "db.sqlite")
+        self.db = SqliteDatabase(database_path, pragmas={'foreign_keys': 1})
         self.bind_db()
 
     def bind_db(self) -> None:
@@ -43,10 +48,15 @@ class Database:
 
 
     def insert_program(self, data: Dict[str, Any]) -> None:
+        print("Inserting")
         program, _ = Program.get_or_create(
             name = data["name"],
             faculty = data["faculty"],
-            catalog_url = data["catalog_url"],
+            catalogue_url = data["catalogue_url"],
+            description = data["description"],
+            learning = data["learning"],
+            practical = data["practical"],
+
         )
 
 
@@ -59,8 +69,6 @@ class Database:
 
 
 if __name__ == "__main__":
-    parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    database_path = os.path.join(parent_directory, "data", "kalkulacka.db")
-    db = Database(database_path)
+    db = Database()
 
 
