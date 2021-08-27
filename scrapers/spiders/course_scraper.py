@@ -1,24 +1,65 @@
+from dataclasses import dataclass
 from pathlib import Path
 
 import openpyxl
 import scrapy
+import selenium
 from scrapy.selector import Selector
 import time
 from components.logger import Logger
 from components.helper import error_message, driver_file
-from components.sqlite import SqliteDatabase
 from selenium import webdriver
 import re
 
 
-class SkillSpider(scrapy.Spider):
+@dataclass
+class Predmet:
+    nazev: str
+    cile: str
+    pozadavky: str
+    obsah: str
+    obor_ids: str
+    obor_names: str
+    # predpoklady_znalosti: str
+    # predpoklady_dovednosti: str
+    # predpoklady_zpusobilosti: str
+    # vysledky_znalosti: str
+    # vysledky_dovednosti: str
+    # vysledky_zpusobilosti: str
+
+    @staticmethod
+    def parse(driver: selenium.webdriver.Chrome):
+        nazev = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[1]/tbody/tr[3]/td[1]').text
+        cile = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[2]/tbody/tr[2]/td').text
+        pozadavky = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[2]/tbody/tr[4]/td').text
+        obsah = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[2]/tbody/tr[6]/td').text
+
+        driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/ul/li[2]/a').click()
+        tbody_container = driver.find_element_by_xpath('//*[@id="fd-table-3"]/tbody')
+        obory = []
+        obory_id = []
+        for row in tbody_container.find_elements_by_xpath("*"):  # lists all children
+            text_cell = row.find_elements_by_xpath("*")[7]
+            print(f"Text cell: {text_cell.get_attribute('innerHTML')}")
+            name = text_cell.find_element_by_tag_name("span").text
+            id = text_cell.find_element_by_tag_name("a").text
+            obory_id.append(id.strip())
+            obory.append(name.strip())
+
+        obory = ";".join(obory)
+        obory_id = ";".join(obory_id)
+
+        return Predmet(
+            nazev, cile, pozadavky, obsah, obory_id, obory)
+
+
+class CourseSpider(scrapy.Spider):
     allowed_domains = ['www.zcu.cz']
-    name = "predmety_spider"
+    name = "course_spider"
     start_urls = ["https://portal.zcu.cz/portal/studium/prohlizeni.html?pc_phs=-2121444242&pc_windowid=615122&pc_publicnavigationalstatechanges=AAAAAA**&pc_phase=render&pc_type=portlet&pc_navigationalstate=JBPNS_rO0ABXdRAApzdGF0ZUNsYXNzAAAAAQA2Y3ouemN1LnN0YWcucG9ydGxldHMxNjgucHJvaGxpemVuaS5zdGF0ZXMuUHJlZG1ldFN0YXRlAAdfX0VPRl9f#prohlizeniContent"]
 
     def __init__(self):
         super().__init__()
-        self.database = SqliteDatabase()
         self.logging = Logger(spider=self.name).logger
         self.driver = webdriver.Chrome(driver_file())
         self.url_index = 0
@@ -28,7 +69,7 @@ class SkillSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             print("Opening", len(self.predmet_params), "params")
-            for _ in range(len(self.predmet_params)):
+            for _ in range(len(self.predmet_params))[:1]:
                 yield scrapy.Request(url=url, callback=self.parse, dont_filter=True)
 
     def load_export_predmetu(self):
@@ -58,5 +99,5 @@ class SkillSpider(scrapy.Spider):
         submit_button.click()
 
         # predemet loaded
-
+        print(Predmet.parse(self.driver))
 

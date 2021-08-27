@@ -3,6 +3,7 @@ import os
 import sys
 from typing import Dict, List, Any
 
+<<<<<<< HEAD
 
 class University(Model):
     name = CharField(primary_key=True)
@@ -12,14 +13,26 @@ class Faculty(Model):
     name = CharField()
 
 
+=======
+>>>>>>> 1f9c15974b4d5ba159f30fe1e01e85afde0ceb00
 class Program(Model):
-    catalog_url = CharField(primary_key=True)
     name = CharField()
     faculty = CharField()
-    # faculty = ForeignKeyField(Faculty, backref="program")
-    program_type = CharField(null=True)
-    length = IntegerField(null=True)
-    language = CharField(null=True)
+    catalogue_url = CharField()
+    specialization_name = CharField()
+    specialization_number = CharField()
+    shortcut = CharField()
+    form = CharField()
+    type = CharField()
+    goal = CharField()
+    annotation = CharField()
+    length = CharField()
+    description = CharField()
+    learning = CharField()
+    practical = CharField()
+    #program_type = CharField()
+    #length = IntegerField()
+    #language = CharField()
 
 
 class Course(Model):
@@ -29,7 +42,7 @@ class Course(Model):
     contents = TextField()
     faculty = CharField()
     # faculty = ForeignKeyField(Faculty, backref="course")
-    
+
 
 class Skill(Model):
     name = CharField()
@@ -38,8 +51,10 @@ class Skill(Model):
 
 
 class Database:
-    def __init__(self, db_path):
-        self.db = SqliteDatabase(db_path, pragmas={'foreign_keys': 1})
+    def __init__(self):
+        parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        database_path = os.path.join(parent_directory, "data", "db.sqlite")
+        self.db = SqliteDatabase(database_path, pragmas={'foreign_keys': 1})
         self.bind_db()
 
     def bind_db(self) -> None:
@@ -54,10 +69,18 @@ class Database:
         full_data = {
             "name": None,
             "faculty": None,
-            "catalog_url": None,
-            "program_type": None,
+            "catalogue_url": None,
+            "specialization_name"
+            "shortcut": None,
+            "specialization_number": None,
+            "form": None,
+            "type": None,
+            "goal": None,
+            "annotation": None,
             "length": None,
-            "language": None,
+            "description": None,
+            "learning": None,
+            "practical": None,
             **data
         }
         Program.create(**full_data)
@@ -66,6 +89,13 @@ class Database:
         if Program.get_or_none(Program.catalog_url == data["catalog_url"]):
             query = Program.update(**data).where(Program.catalog_url == data["catalog_url"])
             query.execute()
+<<<<<<< HEAD
+=======
+        else:
+            Program.create(**full_data)
+        )
+
+>>>>>>> 1f9c15974b4d5ba159f30fe1e01e85afde0ceb00
 
     def insert_skill(self, data: Dict[str, Any]) -> None:
         program, _ = Skill.get_or_create(
@@ -76,9 +106,6 @@ class Database:
 
 
 if __name__ == "__main__":
-    parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    database_path = os.path.join(parent_directory, "data", "kalkulacka.db")
-    db = Database(database_path)
-    for i in range(10):
-        db.insert_program({"name":f"name{i}", "faculty":"faculty", "catalog_url":f"catalog_url{i}"})
-    db.insert_program({"name":f"nameX", "faculty":"faculty", "catalog_url":"catalog_url5"})
+    db = Database()
+
+
