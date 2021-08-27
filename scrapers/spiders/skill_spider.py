@@ -3,6 +3,7 @@ from scrapy.selector import Selector
 import time
 from components.logger import Logger
 from components.helper import error_message, driver_file
+from components.database import Database
 from selenium import webdriver
 import re
 
@@ -72,13 +73,14 @@ class SkillSpider(scrapy.Spider):
         self.parse_table(rows)
 
     def parse_table(self, rows):
-        skill_type, type = None, None
+        item = {}
         for row in rows:
             if row in row_headers:
-                skill_type = self.get_skill_type(row)
-                type = self.get_type(row)
+                item["skill_type"] = self.get_skill_type(row)
+                item["type"] = self.get_type(row)
             else:
-                pass
+                item["name"] = row
+                self.database.insert_skill(item)
 
 
     def get_skill_type(self, row):

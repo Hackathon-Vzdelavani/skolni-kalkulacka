@@ -3,23 +3,16 @@ import os
 import sys
 from typing import Dict, List, Any
 
-
-"""
-class Course(Model):
-    name = CharField()
-    link = CharField()
-    faculty = ForeignKeyField(Faculty, backref="course")
-    tags = None
-"""
-
 class Program(Model):
-    catalog_url = CharField(primary_key=True)
     name = CharField()
     faculty = CharField()
-    # faculty = ForeignKeyField(Faculty, backref="program")
-    program_type = CharField(null=True)
-    length = IntegerField(null=True)
-    language = CharField(null=True)
+    catalogue_url = CharField()
+    description = CharField()
+    learning = CharField()
+    practical = CharField()
+    #program_type = CharField()
+    #length = IntegerField()
+    #language = CharField()
 
 
 class Course(Model):
@@ -27,7 +20,7 @@ class Course(Model):
     link = CharField()
     faculty = CharField()
     # faculty = ForeignKeyField(Faculty, backref="course")
-    
+
 
 class Skill(Model):
     name = CharField()
@@ -36,8 +29,10 @@ class Skill(Model):
 
 
 class Database:
-    def __init__(self, db_path):
-        self.db = SqliteDatabase(db_path, pragmas={'foreign_keys': 1})
+    def __init__(self):
+        parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        database_path = os.path.join(parent_directory, "data", "db.sqlite")
+        self.db = SqliteDatabase(database_path, pragmas={'foreign_keys': 1})
         self.bind_db()
 
     def bind_db(self) -> None:
@@ -53,10 +48,13 @@ class Database:
         full_data = {
             "name": None,
             "faculty": None,
-            "catalog_url": None,
+            "catalogue_url": None,
             "program_type": None,
             "length": None,
             "language": None,
+            "description": None,
+            "learning": None,
+            "practical": None,
             **data
         }
         if Program.get_or_none(Program.catalog_url == full_data["catalog_url"]):
@@ -64,6 +62,7 @@ class Database:
             query.execute()
         else:
             Program.create(**full_data)
+        )
 
 
     def insert_skill(self, data: Dict[str, Any]) -> None:
@@ -75,9 +74,6 @@ class Database:
 
 
 if __name__ == "__main__":
-    parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-    database_path = os.path.join(parent_directory, "data", "kalkulacka.db")
-    db = Database(database_path)
-    for i in range(10):
-        db.insert_program({"name":f"name{i}", "faculty":"faculty", "catalog_url":f"catalog_url{i}"})
-    db.insert_program({"name":f"nameX", "faculty":"faculty", "catalog_url":"catalog_url5"})
+    db = Database()
+
+

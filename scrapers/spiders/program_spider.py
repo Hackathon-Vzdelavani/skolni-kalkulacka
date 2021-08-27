@@ -3,6 +3,7 @@ from scrapy.selector import Selector
 import time
 from components.logger import Logger
 from components.helper import error_message, driver_file
+from components.database import Database
 from selenium import webdriver
 import re
 
@@ -14,10 +15,10 @@ class ProgramSpider(scrapy.Spider):
 
     def __init__(self):
         super().__init__()
-        self.database = SqliteDatabase()
+        self.database = Database()
         self.logging = Logger(spider=self.name).logger
         self.driver = webdriver.Chrome(driver_file())
-        self.program_urls = []
+        self.programs = []
 
     def start_requests(self):
         for url in self.start_urls:
@@ -30,38 +31,58 @@ class ProgramSpider(scrapy.Spider):
             time.sleep(1)
             program_wrapper = self.driver.find_element_by_css_selector('div.article-item')
             selector = Selector(text=program_wrapper.get_attribute('innerHTML'))
-            self.extract_program(selector)
+            self.extract_programs(selector)
+            first_item = self.programs[0]
+            self.item_index = 1
+            self.parse_detail(first_item)
         except Exception as e:
             self.logging.error("Error getting body" + error_message(e))
 
-    def test_url(self, url):
-        return re.match("/cs/Admission/Study-fields/index.html", url)
+    def parse_detail(self, item):
+        try:
+            if self.test_url(item["url"]):
+                self.process_program(item)
+        except Exception as e:
+            self.logging.error("Error getting body" + error_message(e))
+        finally:
+            if (self.item_index < len(self.programs)):
+                self.current_item = self.programs[self.item_index]
+                self.item_index += 1
+                self.parse_detail(self.current_item)
 
-    def extract_program(self, selector):
+    def test_url(self, url):
+        return re.match("https:\/\/www.zcu.cz\/cs\/Admission\/Study-fields\/index.html\?.*", url)
+
+    def extract_programs(self, selector):
         programs = selector.css("li.typo-base-small")
         for program in programs:
             link = program.css("a.head-bold-active::attr(href)").extract_first()
             name = program.css("a.head-bold-active::text").extract_first()
-            faculty = program.css("div.faculty-tag.primary-fpe::text").extract_first()
-            tags = program.css("div.faculty-tag::text").extract()
-            tags = ",".join(tags)
+            faculty = program.css("div.faculty-tag::text").extract_first()
             url = "https://www.zcu.cz" + link
-            if self.test_url(url) and url not in self.program_urls:
-                self.logging.info(name)
-                item = {"url": url, "name": name, "faculty": faculty, "tags": tags}
-                self.extract_program_url(item)
-                self.program_urls.append(url)
-                #self.database.insert_program(item)
+            item = {"url": url, "name": name, "faculty": faculty}
+            self.programs.append(item)
 
-    def extract_program_url(self, item):
+    def process_program(self, item):
         self.logging.info('Visiting program URL ' + item["url"])
         self.driver.get(item["url"])
         try:
             time.sleep(1)
             body = self.driver.find_element_by_css_selector('body')
             selector = Selector(text=body.get_attribute('innerHTML'))
-            detail_link = selector.css("a#detailButton:attr(href)").extract()
-            return detail_link
+            item["catalogue_url"] = selector.css("a#detailButton::attr(href)").extract_first()
+            """
+            content = selector.css("div.content")
+            texts = content.css("p::attr(text)").extract()
+            print(texts)
+            item["description"] = texts[0]
+            item["learning"] = texts[1]
+            item["practical"] = texts[2]
+            """
+            item["description"] = ""
+            item["learning"] = ""
+            item["practical"] = ""
+            print(item)
+            self.database.insert_program(item)
         except Exception as e:
             self.logging.error("Error getting body" + error_message(e))
-            return ""
