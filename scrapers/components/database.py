@@ -3,34 +3,26 @@ import os
 import sys
 
 
-class University(Model):
-    name = CharField(primary_key=True)
-
-
-class Faculty(Model):
-    name = CharField()
-
-
 class Program(Model):
     name = CharField()
     faculty = ForeignKeyField(Faculty, backref="program")
-    university = ForeignKeyField(University, backref="program")
-    link = CharField()
-    tags = None
-    program_type = CharField()
-    length = IntegerField()
-    language = CharField()
+    catalogue_url = CharField()
+    #program_type = CharField()
+    #length = IntegerField()
+    #language = CharField()
 
-
+"""
 class Course(Model):
     name = CharField()
     link = CharField()
     faculty = ForeignKeyField(Faculty, backref="course")
     tags = None
-
+"""
 
 class Skill(Model):
-    ...
+    name = CharField()
+    type = CharField()
+    skill_type = CharField()
 
 
 def init_db(db: SqliteDatabase) -> None:

@@ -84,14 +84,22 @@ class SkillSpider(scrapy.Spider):
         self.parse_table(rows)
 
     def parse_table(self, rows):
+        skill_type, type = None, None
         for row in rows:
             if row in row_headers:
-                pass
+                skill_type = self.get_skill_type(row)
+                type = self.get_type(row)
+            else:
+                self.database.
 
 
     def get_skill_type(self, row):
         if "Odborné znalosti" in row:
-            pass
+            return "znalosti"
+        if "Odborné dovednosti" in row:
+            return "dovednosti"
+        if "Obecné způsobilosti" in row:
+            return "způsobilosti"
 
     def get_type(self, row):
         if "před zahájením" in row:
