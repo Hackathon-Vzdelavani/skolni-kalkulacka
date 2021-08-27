@@ -4,13 +4,13 @@ import sys
 from typing import Dict, List, Any
 
 
-"""
-class Course(Model):
+class University(Model):
+    name = CharField(primary_key=True)
+
+
+class Faculty(Model):
     name = CharField()
-    link = CharField()
-    faculty = ForeignKeyField(Faculty, backref="course")
-    tags = None
-"""
+
 
 class Program(Model):
     catalog_url = CharField(primary_key=True)
@@ -24,7 +24,9 @@ class Program(Model):
 
 class Course(Model):
     name = CharField()
-    link = CharField()
+    goals = TextField()
+    requirements = TextField()
+    contents = TextField()
     faculty = CharField()
     # faculty = ForeignKeyField(Faculty, backref="course")
     
@@ -48,7 +50,6 @@ class Database:
         self.db.create_tables([Program, Skill])
         self.db.close()
 
-
     def insert_program(self, data: Dict[str, Any]) -> None:
         full_data = {
             "name": None,
@@ -59,12 +60,12 @@ class Database:
             "language": None,
             **data
         }
-        if Program.get_or_none(Program.catalog_url == full_data["catalog_url"]):
-            query = Program.update(**full_data).where(Program.catalog_url == full_data["catalog_url"])
+        Program.create(**full_data)
+    
+    def update_program(self, data: Dict[str, Any]):
+        if Program.get_or_none(Program.catalog_url == data["catalog_url"]):
+            query = Program.update(**data).where(Program.catalog_url == data["catalog_url"])
             query.execute()
-        else:
-            Program.create(**full_data)
-
 
     def insert_skill(self, data: Dict[str, Any]) -> None:
         program, _ = Skill.get_or_create(
