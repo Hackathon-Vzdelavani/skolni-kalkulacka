@@ -41,11 +41,12 @@ class ProgramSpider(scrapy.Spider):
     def extract_program(self, selector):
         programs = selector.css("li.typo-base-small")
         for program in programs:
-            link = program.css("a.head-bold-active::attr(href)").extract()
-            name = program.css("a.head-bold-active::text").extract()
-            faculty = program.css("div.faculty-tag.primary-fpe::text").extract()
+            link = program.css("a.head-bold-active::attr(href)").extract_first()
+            name = program.css("a.head-bold-active::text").extract_first()
+            faculty = program.css("div.faculty-tag.primary-fpe::text").extract_first()
             tags = program.css("div.faculty-tag::text").extract()
-            url = "https://www.zcu.cz/" + link
+            tags = ",".join(tags)
+            url = "https://www.zcu.cz" + link
             if self.test_url(url) and url not in self.program_urls:
                 self.logging.info(name)
                 item = {"url": url, "name": name, "faculty": faculty, "tags": tags}
@@ -53,7 +54,7 @@ class ProgramSpider(scrapy.Spider):
                 self.program_urls.append(url)
                 #self.database.insert_program(item)
 
-    def extract_program_url(self, item)
+    def extract_program_url(self, item):
         self.logging.info('Visiting program URL ' + item["url"])
         self.driver.get(item["url"])
         try:
