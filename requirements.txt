@@ -13,3 +13,4 @@ faiss-cpu==1.6.5
 sentence_transformers==0.4.1.2
 pandas==1.2.0
 mysqlclient==2.0.3
+openpyxl==3.0.7
