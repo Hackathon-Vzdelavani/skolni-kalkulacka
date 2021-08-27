@@ -3,18 +3,15 @@ import os
 import sys
 from typing import Dict, List, Any
 
-<<<<<<< HEAD
-
+"""
 class University(Model):
     name = CharField(primary_key=True)
 
 
 class Faculty(Model):
     name = CharField()
+"""
 
-
-=======
->>>>>>> 1f9c15974b4d5ba159f30fe1e01e85afde0ceb00
 class Program(Model):
     name = CharField()
     faculty = CharField()
@@ -30,9 +27,6 @@ class Program(Model):
     description = CharField()
     learning = CharField()
     practical = CharField()
-    #program_type = CharField()
-    #length = IntegerField()
-    #language = CharField()
 
 
 class Course(Model):
@@ -86,16 +80,8 @@ class Database:
         Program.create(**full_data)
     
     def update_program(self, data: Dict[str, Any]):
-        if Program.get_or_none(Program.catalog_url == data["catalog_url"]):
-            query = Program.update(**data).where(Program.catalog_url == data["catalog_url"])
-            query.execute()
-<<<<<<< HEAD
-=======
-        else:
-            Program.create(**full_data)
-        )
-
->>>>>>> 1f9c15974b4d5ba159f30fe1e01e85afde0ceb00
+        query = Program.update(**data).where(Program.catalog_url == data["catalogue_url"])
+        query.execute()
 
     def insert_skill(self, data: Dict[str, Any]) -> None:
         program, _ = Skill.get_or_create(
@@ -103,6 +89,10 @@ class Database:
             type = data["type"],
             skill_type = data["skill_type"],
         )
+
+    def get_programs(self):
+        query = Program.get()
+        query.execute()
 
 
 if __name__ == "__main__":

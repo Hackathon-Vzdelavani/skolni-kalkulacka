@@ -79,9 +79,6 @@ class ProgramSpider(scrapy.Spider):
             item["learning"] = texts[1]
             item["practical"] = texts[2]
             """
-            item["description"] = ""
-            item["learning"] = ""
-            item["practical"] = ""
             print(item)
             self.database.insert_program(item)
         except Exception as e:
