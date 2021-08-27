@@ -1,11 +1,13 @@
 import sqlite3
 from sqlite3 import Error
 import os
+from components.logger import Logger
 parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
 
 class SqliteDatabase:
     def __init__(self):
+        self.logger = Logger("db").logger
         self.create_connection()
 
     def create_connection(self):
@@ -21,10 +23,10 @@ class SqliteDatabase:
             if conn:
                 conn.close()
 
-    def get_db_offerings(self, course_id):
+    def get_programs(self):
         try:
-            query_text = """SELECT * FROM learn_offerings WHERE course_id=%s"""
-            self.cursor.execute(query_text, [course_id])
+            query_text = """SELECT * FROM program"""
+            self.cursor.execute(query_text)
         except Exception as e:
             self.logger.error(str(e))
         result = self.cursor.fetchall()
