@@ -44,7 +44,9 @@ class ProgramSpider(scrapy.Spider):
             link = program.css("a.head-bold-active::attr(href)").extract_first()
             name = program.css("a.head-bold-active::text").extract_first()
             faculty = program.css("div.faculty-tag.primary-fpe::text").extract_first()
-            tags = program.css("div.faculty-tag::text").extract_first()
+            tags = program.css("div.faculty-tag::text").extract()
+            tags = ",".join(tags)
+            print(tags)
             url = "https://www.zcu.cz" + link
             self.logging.info(url)
             if self.test_url(url) and url not in self.program_urls:
