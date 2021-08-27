@@ -3,7 +3,6 @@ from scrapy.selector import Selector
 import time
 from components.logger import Logger
 from components.helper import error_message, driver_file
-from components.sqlite import SqliteDatabase
 from selenium import webdriver
 import re
 

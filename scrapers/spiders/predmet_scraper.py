@@ -18,6 +18,8 @@ class Predmet:
     cile: str
     pozadavky: str
     obsah: str
+    obor_ids: str
+    obor_names: str
     # predpoklady_znalosti: str
     # predpoklady_dovednosti: str
     # predpoklady_zpusobilosti: str
@@ -32,8 +34,23 @@ class Predmet:
         pozadavky = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[2]/tbody/tr[4]/td').text
         obsah = driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/div/table[2]/tbody/tr[6]/td').text
 
+        driver.find_element_by_xpath('//*[@id="prohlizeniDetail"]/ul/li[2]/a').click()
+        tbody_container = driver.find_element_by_xpath('//*[@id="fd-table-3"]/tbody')
+        obory = []
+        obory_id = []
+        for row in tbody_container.find_elements_by_xpath("*"):  # lists all children
+            text_cell = row.find_elements_by_xpath("*")[7]
+            print(f"Text cell: {text_cell.get_attribute('innerHTML')}")
+            name = text_cell.find_element_by_tag_name("span").text
+            id = text_cell.find_element_by_tag_name("a").text
+            obory_id.append(id.strip())
+            obory.append(name.strip())
+
+        obory = ";".join(obory)
+        obory_id = ";".join(obory_id)
+
         return Predmet(
-            nazev, cile, pozadavky, obsah)
+            nazev, cile, pozadavky, obsah, obory_id, obory)
 
 
 class SkillSpider(scrapy.Spider):
@@ -52,7 +69,7 @@ class SkillSpider(scrapy.Spider):
     def start_requests(self):
         for url in self.start_urls:
             print("Opening", len(self.predmet_params), "params")
-            for _ in range(len(self.predmet_params))[:50]:
+            for _ in range(len(self.predmet_params))[:1]:
                 yield scrapy.Request(url=url, callback=self.parse, dont_filter=True)
 
     def load_export_predmetu(self):
