@@ -36,9 +36,9 @@ class Predmet:
             nazev, cile, pozadavky, obsah)
 
 
-class SkillSpider(scrapy.Spider):
+class CourseSpider(scrapy.Spider):
     allowed_domains = ['www.zcu.cz']
-    name = "predmety_spider"
+    name = "course_spider"
     start_urls = ["https://portal.zcu.cz/portal/studium/prohlizeni.html?pc_phs=-2121444242&pc_windowid=615122&pc_publicnavigationalstatechanges=AAAAAA**&pc_phase=render&pc_type=portlet&pc_navigationalstate=JBPNS_rO0ABXdRAApzdGF0ZUNsYXNzAAAAAQA2Y3ouemN1LnN0YWcucG9ydGxldHMxNjgucHJvaGxpemVuaS5zdGF0ZXMuUHJlZG1ldFN0YXRlAAdfX0VPRl9f#prohlizeniContent"]
 
     def __init__(self):
