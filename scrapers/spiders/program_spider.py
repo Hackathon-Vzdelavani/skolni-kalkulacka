@@ -40,9 +40,11 @@ class ProgramSpider(scrapy.Spider):
 
     def extract_program_urls(self, selector):
         programs = selector.css("li.typo-base-small")
-        print(programs)
         for program in programs:
+            print(program)
+            print("test")
             link = program.css("a.head-bold-active::attr(href)").extract()
+            print(link)
             name = program.css("a.head-bold-active::text").extract()
             faculty = program.css("div.faculty-tag.primary-fpe::text").extract()
             tags = program.css("div.faculty-tag::text").extract()
