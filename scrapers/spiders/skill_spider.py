@@ -37,7 +37,7 @@ class SkillSpider(scrapy.Spider):
 
     def __init__(self):
         super().__init__()
-        self.database = SqliteDatabase()
+        self.database = Database()
         self.logging = Logger(spider=self.name).logger
         self.driver = webdriver.Chrome(driver_file())
         self.url_index = 0

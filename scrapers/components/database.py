@@ -27,9 +27,6 @@ class Program(Model):
     description = CharField()
     learning = CharField()
     practical = CharField()
-    #program_type = CharField()
-    #length = IntegerField()
-    #language = CharField()
 
 
 class Course(Model):
