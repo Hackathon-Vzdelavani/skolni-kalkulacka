@@ -33,7 +33,17 @@ def error_message(ex):
     message = template.format(type(ex).__name__, ex.args)
     return message
 
-def argument_parser():
+
+
+def parse_bool_string(val):
+    if val == "True":
+        return True
+    elif val == "False":
+        return False
+    return val
+
+
+def argument_parser(just_key=False):
     arguments = {}
     passed_arguments = sys.argv[1:]
     for index, arg in enumerate(passed_arguments):
@@ -41,8 +51,12 @@ def argument_parser():
             a, b = arg, passed_arguments[index]
         else:
             a, b = arg, None
+        if just_key:
+            key = a.replace('--', '')
+            arguments[key] = True
         if a.startswith('--') and '=' in a:
             key, val = a.split('=')
             key = key.replace('--', '')
-        arguments[key] = val
+            val = parse_bool_string(val)
+            arguments[key] = val
     return arguments

@@ -31,9 +31,9 @@ skip_rows = [
 ]
 
 class SkillSpider(scrapy.Spider):
-    allowed_domains = ['www.zcu.cz']
+    allowed_domains = ['portal.zcu.cz']
     name = "skill_spider"
-    start_urls = ["https://portal.zcu.cz/StagPortletsJSR168/CleanUrl?urlid=prohlizeni-browser-obor&browserFakulta=FDU&browserProgram=1808&browserObor=4036&browserRok=2021"]
+    start_urls = ["https://portal.zcu.cz"]
 
     def __init__(self):
         super().__init__()
@@ -41,11 +41,15 @@ class SkillSpider(scrapy.Spider):
         self.logging = Logger(spider=self.name).logger
         self.driver = webdriver.Chrome(driver_file())
         self.url_index = 0
-        self.program_urls = self.database.get_programs()
+        self.program_urls = self.database.get_program_urls()
 
     def start_requests(self):
-        for url in self.start_urls:
-            yield scrapy.Request(url=url, callback=self.parse)
+        self.logging.info(f"Link number: {self.url_index}")
+        if (self.url_index < len(self.program_urls)):
+            self.current_url = self.program_urls[self.url_index]
+            self.url_index += 1
+            yield scrapy.Request(url=self.current_url, callback=self.parse, dont_filter=True)
+
 
     def test_program_url(self, url):
         return re.match("https:\/\/portal.zcu.cz*", url)
@@ -66,7 +70,9 @@ class SkillSpider(scrapy.Spider):
             if (self.url_index < len(self.program_urls)):
                 self.current_url = self.program_urls[self.url_index]
                 self.url_index += 1
-                yield scrapy.Request(url=self.current_url, callback=self.parse)
+                yield scrapy.Request(url=self.current_url, callback=self.parse, dont_filter=True)
+
+
 
     def extract_program_header(self, selector):
         item = {}

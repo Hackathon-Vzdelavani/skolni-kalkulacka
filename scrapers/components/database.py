@@ -15,7 +15,7 @@ class Faculty(Model):
 class Program(Model):
     name = CharField()
     faculty = CharField()
-    catalog_url = CharField()
+    catalogue_url = CharField()
     specialization_name = CharField()
     specialization_number = CharField()
     shortcut = CharField()
@@ -27,6 +27,20 @@ class Program(Model):
     description = CharField()
     learning = CharField()
     practical = CharField()
+
+
+class ProgramDetail(Model):
+    id = CharField()
+    name = CharField()
+    code = CharField()
+    title = CharField()
+    type = CharField()
+    form = CharField()
+    faculty = CharField()
+    length = CharField()
+    goal = CharField()
+    garant = CharField()
+    language = CharField()
 
 
 class Course(Model):
@@ -47,7 +61,7 @@ class Skill(Model):
 class Database:
     def __init__(self):
         parent_directory = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        database_path = os.path.join(parent_directory, "data", "db.sqlite")
+        database_path = os.path.join(parent_directory, "data", "kalk.sqlite")
         self.db = SqliteDatabase(database_path, pragmas={'foreign_keys': 1})
         self.bind_db()
 
@@ -55,26 +69,30 @@ class Database:
         """
         Bind the models to the database.
         """
-        self.db.bind([Program, Skill])
-        self.db.create_tables([Program, Skill])
+        self.db.bind([Program, Skill, ProgramDetail, Course])
+        self.db.create_tables([Program, Skill, ProgramDetail, Course])
         self.db.close()
+
+    def insert_program_detail(self, data: Dict[str, Any]) -> None:
+        print(data["id"])
+        ProgramDetail.create(**data)
 
     def insert_program(self, data: Dict[str, Any]) -> None:
         full_data = {
-            "name": None,
-            "faculty": None,
-            "catalogue_url": None,
-            "specialization_name"
-            "shortcut": None,
-            "specialization_number": None,
-            "form": None,
-            "type": None,
-            "goal": None,
-            "annotation": None,
-            "length": None,
-            "description": None,
-            "learning": None,
-            "practical": None,
+            "name": "",
+            "faculty": "",
+            "catalogue_url": "",
+            "specialization_name": "",
+            "shortcut": "",
+            "specialization_number": "",
+            "form": "",
+            "type": "",
+            "goal": "",
+            "annotation": "",
+            "length": "",
+            "description": "",
+            "learning": "",
+            "practical": "",
             **data
         }
         Program.create(**full_data)
@@ -84,15 +102,18 @@ class Database:
             query = Program.update(**data).where(Program.catalog_url == data["catalog_url"])
             query.execute()
 
-    def get_program(self, field_name: str, field_value: Any):
-        return Program.get_or_none(getattr(Program, field_name) == field_value)
-
     def insert_skill(self, data: Dict[str, Any]) -> None:
         program, _ = Skill.get_or_create(
             name = data["name"],
             type = data["type"],
             skill_type = data["skill_type"],
         )
+
+    def get_program_urls(self):
+        query = Program.select(Program.catalogue_url).dicts()
+        data = query.execute()
+        data = [item["catalogue_url"] for item in data]
+        return data
 
 
 if __name__ == "__main__":
