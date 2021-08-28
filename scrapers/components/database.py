@@ -3,7 +3,6 @@ import os
 import sys
 from typing import Dict, List, Any
 
-<<<<<<< HEAD
 
 class University(Model):
     name = CharField(primary_key=True)
@@ -13,12 +12,10 @@ class Faculty(Model):
     name = CharField()
 
 
-=======
->>>>>>> 1f9c15974b4d5ba159f30fe1e01e85afde0ceb00
 class Program(Model):
     name = CharField()
     faculty = CharField()
-    catalogue_url = CharField()
+    catalog_url = CharField()
     specialization_name = CharField()
     specialization_number = CharField()
     shortcut = CharField()
@@ -85,17 +82,13 @@ class Database:
         }
         Program.create(**full_data)
     
-    def update_program(self, data: Dict[str, Any]):
+    def update_program(self, data: Dict[str, Any]) -> None:
         if Program.get_or_none(Program.catalog_url == data["catalog_url"]):
             query = Program.update(**data).where(Program.catalog_url == data["catalog_url"])
             query.execute()
-<<<<<<< HEAD
-=======
-        else:
-            Program.create(**full_data)
-        )
 
->>>>>>> 1f9c15974b4d5ba159f30fe1e01e85afde0ceb00
+    def get_program(self, field_name: str, field_value: Any):
+        return Program.get_or_none(getattr(Program, field_name) == field_value)
 
     def insert_skill(self, data: Dict[str, Any]) -> None:
         program, _ = Skill.get_or_create(
